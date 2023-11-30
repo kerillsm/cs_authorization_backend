@@ -1,12 +1,30 @@
+import md5 from 'md5';
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from 'src/entities/User.entity';
 
 @Injectable()
 export class UserService {
-  create() {}
+  constructor(
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+  ) {}
 
-  get() {}
+  create(email: string, name: string, unHashedPassword: string) {
+    const password = md5(unHashedPassword);
+    return this.usersRepository.create({ email, name, password });
+  }
 
-  remove() {}
+  get(id: number) {
+    return this.usersRepository.findOneBy({ id });
+  }
 
-  update() {}
+  remove(id: number) {
+    return this.usersRepository.delete(id);
+  }
+
+  update(id: number, data: Partial<User>) {
+    return this.usersRepository.update({ id }, data);
+  }
 }

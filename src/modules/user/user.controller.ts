@@ -6,7 +6,5 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  register(): void {
-    return this.userService.create();
-  }
+  register(): void {}
 }
