@@ -6,4 +6,5 @@ export default () => ({
   db_username: getSafeEnv('DB_USERNAME'),
   db_password: getSafeEnv('DB_PASSWORD'),
   db_database: getSafeEnv('DB_DATABASE'),
+  jwt_secret: getSafeEnv('JWT_SECRET'),
 });

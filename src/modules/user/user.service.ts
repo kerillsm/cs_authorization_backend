@@ -11,20 +11,31 @@ export class UserService {
     private usersRepository: Repository<User>,
   ) {}
 
-  create(email: string, name: string, unHashedPassword: string) {
-    const password = md5(unHashedPassword);
+  create(email: string, name: string, password: string) {
     return this.usersRepository.create({ email, name, password });
   }
 
-  get(id: number) {
+  getAll() {
+    return this.usersRepository.find();
+  }
+
+  getById(id: number) {
+    // TODO: return undefined if not found
     return this.usersRepository.findOneBy({ id });
   }
 
+  getByEmail(email: string) {
+    // TODO: return undefined if not found
+    return this.usersRepository.findOneBy({ email });
+  }
+
   remove(id: number) {
+    // TODO: return deleted entity
     return this.usersRepository.delete(id);
   }
 
   update(id: number, data: Partial<User>) {
+    // TODO: return updated
     return this.usersRepository.update({ id }, data);
   }
 }
