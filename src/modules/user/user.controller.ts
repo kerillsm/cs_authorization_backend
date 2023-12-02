@@ -7,7 +7,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { AuthGuard } from 'src/modules/auth/auth.guard';
-import { User } from 'src/entities/User.entity';
+import { UserEntity } from 'src/entities/User.entity';
 import { UserService } from './user.service';
 
 @Controller()
@@ -16,7 +16,7 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Get('/me')
-  all(@Request() req): Promise<User> {
+  all(@Request() req): Promise<UserEntity> {
     return this.userService.getById(req.user.id);
   }
 
@@ -29,7 +29,7 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Get('/update')
-  update(@Body() updateDTO: Partial<User>): Promise<void> {
+  update(@Body() updateDTO: Partial<UserEntity>): Promise<void> {
     const { id, ...data } = updateDTO;
     if (!id) {
       throw new BadRequestException('Id field is required');

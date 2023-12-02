@@ -2,13 +2,13 @@ import md5 from 'md5';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from 'src/entities/User.entity';
+import { UserEntity } from 'src/entities/User.entity';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    @InjectRepository(UserEntity)
+    private usersRepository: Repository<UserEntity>,
   ) {}
 
   create(email: string, name: string, password: string) {
@@ -24,8 +24,7 @@ export class UserService {
     return this.usersRepository.findOneBy({ id });
   }
 
-  getByEmail(email: string) {
-    // TODO: return undefined if not found
+  getByEmail(email: string): Promise<UserEntity | null> {
     return this.usersRepository.findOneBy({ email });
   }
 
@@ -34,7 +33,7 @@ export class UserService {
     return this.usersRepository.delete(id);
   }
 
-  update(id: number, data: Partial<User>) {
+  update(id: number, data: Partial<UserEntity>) {
     // TODO: return updated
     return this.usersRepository.update({ id }, data);
   }

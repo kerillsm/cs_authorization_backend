@@ -21,6 +21,8 @@ import configuration from './config/configuration';
         username: configService.get('db_username'),
         password: configService.get('db_password'),
         database: configService.get('db_database'),
+        entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+        synchronize: true,
       }),
     }),
     JwtModule.registerAsync({
