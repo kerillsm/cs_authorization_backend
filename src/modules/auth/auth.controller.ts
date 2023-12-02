@@ -15,12 +15,20 @@ export class AuthController {
 
   @Post('/register')
   register(
-    @Body() registerDto: { email: string; name: string; password: string },
+    @Body()
+    {
+      email,
+      name,
+      password,
+    }: {
+      email: string;
+      name: string;
+      password: string;
+    },
   ) {
-    return this.authService.register(
-      registerDto.email,
-      registerDto.name,
-      registerDto.password,
-    );
+    if (!email || !name || !password) {
+      throw new BadRequestException('Validation failed');
+    }
+    return this.authService.register(email, name, password);
   }
 }

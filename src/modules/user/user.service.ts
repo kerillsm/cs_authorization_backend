@@ -12,7 +12,7 @@ export class UserService {
   ) {}
 
   create(email: string, name: string, password: string) {
-    return this.usersRepository.create({ email, name, password });
+    return this.usersRepository.save({ email, name, password });
   }
 
   getAll() {

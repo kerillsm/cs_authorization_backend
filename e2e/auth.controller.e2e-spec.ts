@@ -32,10 +32,10 @@ describe('StatController (e2e)', () => {
   describe('[POST] /login', () => {
     test.each([{}, { email: 'mail@mail.com' }, { password: '12345678' }])(
       'should return error if fields are missing',
-      async (paylaod) => {
+      async (payload) => {
         const response = await request(app.getHttpServer())
           .post('/auth/login')
-          .send(paylaod);
+          .send(payload);
 
         expect(response.body.statusCode).toBe(400);
         expect(response.body.error).toBe('Bad Request');
@@ -98,14 +98,90 @@ describe('StatController (e2e)', () => {
       { email: 'mail@mail.com', password: '12345678' },
       { email: 'mail@mail.com', name: 'John Doe' },
       { password: '12345678', name: 'John Doe' },
-    ])('should return error if fields are missing', () => {});
+    ])('should return error if fields are missing', async (payload) => {
+      const response = await request(app.getHttpServer())
+        .post('/auth/register')
+        .send(payload);
 
-    test('should return error if email in incorrect format', () => {});
+      expect(response.body.statusCode).toBe(400);
+      expect(response.body.error).toBe('Bad Request');
+      expect(response.body.message).toBe('Validation failed');
+    });
 
-    test('should return error if password too short', () => {});
+    test('should return error if email in incorrect format', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          email: 'incorrect-email',
+          name: 'John Doe',
+          password: '123456',
+        });
 
-    test('should return error if user already exist', () => {});
+      expect(response.body.statusCode).toBe(400);
+      expect(response.body.error).toBe('Bad Request');
+      expect(response.body.message).toBe('Incorrect email format');
+    });
 
-    test('should return user without password if data is correct', () => {});
+    test('should return error if password too short', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          email: 'mail@mail.com',
+          name: 'John Doe',
+          password: '123',
+        });
+
+      expect(response.body.statusCode).toBe(400);
+      expect(response.body.error).toBe('Bad Request');
+      expect(response.body.message).toBe(
+        'Password must be no less than 6 symbols',
+      );
+    });
+
+    test('should return error if user already exist', async () => {
+      await userRepository.save({
+        email: 'mail@mail.com',
+        name: 'John Doe',
+        password: md5('123456'),
+      });
+
+      const response = await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          email: 'mail@mail.com',
+          name: 'Doe John',
+          password: '123456',
+        });
+
+      const users = await userRepository.find();
+
+      expect(response.body.statusCode).toBe(403);
+      expect(response.body.error).toBe('Forbidden');
+      expect(response.body.message).toBe('User with such email already exists');
+    });
+
+    test('should return user without password if data is correct', async () => {
+      const userBeforeRegistration = await userRepository.findOneBy({
+        email: 'mail@mail.com',
+      });
+      const response = await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          email: 'mail@mail.com',
+          name: 'Doe John',
+          password: '123456',
+        });
+      const userAfterRegistration = await userRepository.findOneBy({
+        email: 'mail@mail.com',
+      });
+
+      expect(userBeforeRegistration).toBe(null);
+      expect(response.body.email).toBe('mail@mail.com');
+      expect(response.body.name).toBe('Doe John');
+      expect(response.body.password).toBeUndefined();
+      expect(userAfterRegistration.email).toBe('mail@mail.com');
+      expect(userAfterRegistration.name).toBe('Doe John');
+      expect(userAfterRegistration.password).toBe(md5('123456'));
+    });
   });
 });

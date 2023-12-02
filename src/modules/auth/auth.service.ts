@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import * as md5 from 'md5';
 import { ConfigService } from '@nestjs/config';
+import { UserEntity } from 'src/entities/User.entity';
 
 @Injectable()
 export class AuthService {
@@ -39,11 +40,29 @@ export class AuthService {
     };
   }
 
-  async register(email: string, name: string, password: string): Promise<void> {
+  async register(
+    email: string,
+    name: string,
+    password: string,
+  ): Promise<Omit<UserEntity, 'password'>> {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw new BadRequestException('Incorrect email format');
+    }
+    if (password.length < 6) {
+      throw new BadRequestException('Password must be no less than 6 symbols');
+    }
     try {
-      await this.userService.create(email, name, md5(password));
+      const user = await this.userService.create(email, name, md5(password));
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      };
     } catch (err) {
-      throw new BadRequestException('Could not register');
+      if (err.code === '23505') {
+        throw new ForbiddenException('User with such email already exists');
+      }
+      throw new BadRequestException('Error while register');
     }
   }
 }
