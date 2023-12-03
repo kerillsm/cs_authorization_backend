@@ -8,7 +8,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 
-describe('StatController (e2e)', () => {
+describe('AuthController (e2e)', () => {
   let app: INestApplication;
   let userRepository: Repository<UserEntity>;
   let jwtService: JwtService;
@@ -27,6 +27,7 @@ describe('StatController (e2e)', () => {
 
   afterAll(async () => {
     await app.close();
+    await userRepository.clear();
   });
 
   describe('[POST] /login', () => {
@@ -152,8 +153,6 @@ describe('StatController (e2e)', () => {
           name: 'Doe John',
           password: '123456',
         });
-
-      const users = await userRepository.find();
 
       expect(response.body.statusCode).toBe(403);
       expect(response.body.error).toBe('Forbidden');

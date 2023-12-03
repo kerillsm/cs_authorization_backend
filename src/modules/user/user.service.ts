@@ -1,5 +1,4 @@
-import md5 from 'md5';
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from 'src/entities/User.entity';
@@ -15,12 +14,11 @@ export class UserService {
     return this.usersRepository.save({ email, name, password });
   }
 
-  getAll() {
+  getAll(): Promise<UserEntity[]> {
     return this.usersRepository.find();
   }
 
-  getById(id: number) {
-    // TODO: return undefined if not found
+  getById(id: number): Promise<UserEntity | null> {
     return this.usersRepository.findOneBy({ id });
   }
 
@@ -28,13 +26,22 @@ export class UserService {
     return this.usersRepository.findOneBy({ email });
   }
 
-  remove(id: number) {
-    // TODO: return deleted entity
-    return this.usersRepository.delete(id);
+  async remove(id: number): Promise<{ deleted: true }> {
+    const { affected } = await this.usersRepository.delete(id);
+    if (!affected) {
+      throw new BadRequestException('Error while updating');
+    }
+    return { deleted: true };
   }
 
-  update(id: number, data: Partial<UserEntity>) {
-    // TODO: return updated
-    return this.usersRepository.update({ id }, data);
+  async update(
+    id: number,
+    data: Partial<UserEntity>,
+  ): Promise<{ updated: true }> {
+    const { affected } = await this.usersRepository.update({ id }, data);
+    if (!affected) {
+      throw new BadRequestException('Error while updating');
+    }
+    return { updated: true };
   }
 }
